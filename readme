@@ -1,6 +1,6 @@
 To run the training code, simply "python train.py", default arguments will make it run on Publaynet dataset in the repo.
 
-All arguments now in parser.py now. Basically what we need to change across different dataset is 
+All arguments now in parser.py now. Basically what we need to change across different datasets are:
     --batch_size  "defaultly 64, it only uses about 8GB memory on my local GPU"
     --lr           "learning rate"
     --lr_anneal_steps   "how many steps you wanna train"
@@ -8,13 +8,13 @@ All arguments now in parser.py now. Basically what we need to change across diff
     --in_channel      "The length of each token embedding vector, also the input and output embedding vector length of the transformer used in diffusion process"   in/output is shape [batch_size *  max_sequence_length * in/out_channel]
     --out_channel     "The same size as in_channel, diffussion is an end-to-end process"
     --vocab_size      "Typically, it should be 256 + category_number + 4 (start, end, pad, unknown token). But since dataset has some noise input value, you can setup a safe larger number to make it run"
-    --checkpoint_path   "The checkpoints will be output to ./diffusion_models/{checkpoint_path}", "./diffusion_models" will be generated automatically.
+    --checkpoint_path   "The checkpoints will be output to './diffusion_models/{checkpoint_path}', "./diffusion_models" will be generated automatically.
     --pln_train       "The path to training dataset folder, 'train.txt' and 'val.txt' should be in that folder"
     --padding_mode    "default='pad', padding the sequence, or "block" "
     --noise_schedule   "scheduled noise added to diffusion process, it can be 'linear, cosine, sqrt, trunc_cos, trunc_lin, pw_lin'. default=sqrt "
 
 
-For better debugging, model initilization in "utils.py", trainer in "train_utils.py", dataset loading in "text_dataset.py", models are in "gaussian_diffusion.py", 
+For better debugging, model initilization in "utils.py", trainer in "train_utils.py", dataset loading in "text_dataset.py", models are in "all_utils/gaussian_diffusion.py", 
 
 All files under ./all_utlis can be directly used without change for now.
 
