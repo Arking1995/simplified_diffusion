@@ -26,8 +26,8 @@ class BaseOptions():
 
         parser.add_argument('--image_size', type=int, default=8, help='')
         parser.add_argument('--hidden_size', type=int, default=128, help='')
-        parser.add_argument('--in_channel', type=int, default=128, help='')
-        parser.add_argument('--out_channel', type=int, default=128, help='')
+        parser.add_argument('--in_channel', type=int, default=128, help='The embedding size, also the hidden state vector length')
+        parser.add_argument('--out_channel', type=int, default=128, help='same as the in_channel')
         parser.add_argument('--m', type=int, default=3, help='')
         parser.add_argument('--k', type=int, default=32, help='')
         parser.add_argument('--lr_anneal_steps', type=int, default=200000, help='')
@@ -55,6 +55,9 @@ class BaseOptions():
 
         parser.add_argument('--batch_size', type=int, default=64)    
         parser.add_argument('--checkpoint_path', type=str, default="diff_test")
+        parser.add_argument('--pln_train', type=str, default="dataset/PubLayNet", help='The dataset folder of the training data')
+
+        
 
         args = parser.parse_args()
         folder_name = 'diffusion_models/'

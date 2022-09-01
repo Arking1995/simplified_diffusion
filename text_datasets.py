@@ -372,10 +372,10 @@ def get_corpus_rocstory(data_args, model, image_size, padding_mode='block',
             sentence_lst = []
             if split == 'train':
                 print('loading form the TRAIN set')
-                path = f'{data_args.pln_train}/publaynet_train.txt'
+                path = f'{data_args.pln_train}/train.txt'
             elif split == 'valid':
                 print('loading form the VALID set')
-                path = f'{data_args.pln_train}/publaynet_val.txt'
+                path = f'{data_args.pln_train}/val.txt'
             else:
                 assert False, "invalid split for ROC dataset"
             with open(path, 'r') as pln_reader:
