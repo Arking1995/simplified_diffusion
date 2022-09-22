@@ -25,6 +25,8 @@ import torch.nn.functional as F
 
 
 import argparse
+NUM_CLASSES = 1000
+
 
 
 class TransformerNetModel2(nn.Module):
