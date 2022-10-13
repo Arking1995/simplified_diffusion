@@ -4,7 +4,7 @@ All arguments now in parser.py now. Basically what we need to change across diff
     --batch_size  "defaultly 64, it only uses about 8GB memory on my local GPU"
     --lr           "learning rate"
     --lr_anneal_steps   "how many steps you wanna train"
-    --diffusion_steps  "how many diffusion steps are used in this training"
+    --diff_steps  "how many diffusion steps are used in this training"
     --in_channel      "The length of each token embedding vector, also the input and output embedding vector length of the transformer used in diffusion process"   in/output is shape [batch_size *  max_sequence_length * in/out_channel]
     --out_channel     "The same size as in_channel, diffussion is an end-to-end process"
     --vocab_size      "Typically, it should be 256 + category_number + 4 (start, end, pad, unknown token). But since dataset has some noise input value, you can setup a safe larger number to make it run"
