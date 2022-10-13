@@ -40,7 +40,7 @@ def main():
     args.__dict__.update(training_args)
     args.sigma_small = True
 
-    args.diffusion_steps = 10 #500  # DEBUG
+    args.diffusion_steps = 100 #500  # DEBUG
     print("exp: ", args.experiment)
     print("exp_mode: ", args.experiment_mode)
 
@@ -82,7 +82,7 @@ def main():
         sample_fn = (
             diffusion.p_sample_loop if not args.use_ddim else diffusion.ddim_sample_loop
         )
-        print(sample_fn)
+        # print('sample_fn: ', sample_fn)
 
         if args.mbr_sample > 1 and args.experiment_mode == 'conditional_gen':
             sample_shape = (args.batch_size * args.mbr_sample, args.image_size ** 2, args.in_channel)
@@ -207,7 +207,7 @@ def create_argparser():
     text_defaults = dict(modality='layout',
                          dataset_name='PublayNet',
                          dataset_config_name='layout-PublayNet',
-                         model_name_or_path='C:\Summer_Intern\Diffusion_LM\pretrained_models',
+                         model_name_or_path='/opt/data/liuhe95/simplified_diffusion/pretrained_model',
                          experiment='e2e-tgt', model_arch='transformer',
                          preprocessing_num_workers=1,
                          emb_scale_factor=1.0, top_p=-1., split='valid', clamp='clamp')

@@ -43,6 +43,8 @@ def get_weights(model, args):
     model.weight.requires_grad = False
     return model
 
+
+
 def denoised_fn_round(args, model, text_emb, t):
     # thresh_t = 50
     # # print(thresh_t)
@@ -108,3 +110,6 @@ def load_results(json_path, load_dict):
     import json
     with open(json_path, 'w') as f:
         json.dump(load_dict, f, indent=2)
+
+
+

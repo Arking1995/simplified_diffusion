@@ -57,7 +57,10 @@ class BaseOptions():
         parser.add_argument('--checkpoint_path', type=str, default="diff_test")
         parser.add_argument('--pln_train', type=str, default="dataset/PubLayNet", help='The dataset folder of the training data')
 
-        
+        parser.add_argument('--num_samples', type=int, default=3, help='The number of intermediate output samples.')
+        parser.add_argument('--mbr_sample', type=int, default=1, help='')
+        parser.add_argument('--save_interval', type=int, default=1000, help='save interval')
+
 
         args = parser.parse_args()
         folder_name = 'diffusion_models/'

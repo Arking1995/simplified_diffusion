@@ -126,5 +126,6 @@ if __name__ == '__main__':
         checkpoint_path=args.checkpoint_path,
         gradient_clipping=args.gradient_clipping,
         eval_data=data_valid,
-        eval_interval=args.eval_interval
+        eval_interval=args.eval_interval,
+        args = args
     ).run_loop()

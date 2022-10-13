@@ -142,7 +142,7 @@ def helper_tokenize_encode_cond(sentence_lst, vocab_dict, model, seqlen, data_ar
             group_lst['word_ids'].append(input_ids)
             group_lst['src_ids'].append(tokenized_src)
 
-        print(group_lst['word_ids'][:2])
+        # print(group_lst['word_ids'][:2])
         print('padding mode is pad')
         max_length = seqlen
         group_lst['word_ids'] = _collate_batch_helper(group_lst['word_ids'], vocab_dict['PAD'], max_length)

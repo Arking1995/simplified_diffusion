@@ -1,13 +1,17 @@
 import copy
 import functools
 import os
-
+from transformers import set_seed
 import blobfile as bf
 import numpy as np
 import torch
 # import torch.distributed as dist
 # from torch.nn.parallel.distributed import DistributedDataParallel as DDP
 from torch.optim import AdamW
+from functools import partial
+from all_utils.rounding import rounding_func, load_models, load_tokenizer
+from all_utils.test_util import get_weights, denoised_fn_round
+import json
 
 import all_utils.logger as logger
 from all_utils.fp16_util import (
@@ -49,6 +53,7 @@ class TrainLoop:
         gradient_clipping=-1.,
         eval_data=None,
         eval_interval=-1,
+        args = None
     ):
         self.model = model
         self.diffusion = diffusion
@@ -84,6 +89,7 @@ class TrainLoop:
 
         self.checkpoint_path = checkpoint_path # DEBUG **
         self.ngpu = torch.cuda.device_count()
+        self.args = args
 
 
         self._load_and_sync_parameters()
@@ -164,6 +170,7 @@ class TrainLoop:
                 logger.dumpkvs()
             if self.step % self.save_interval == 0:
                 self.save()
+                self.output_intermediate_results()
                 # Run for a finite amount of time in integration tests.
                 if os.environ.get("DIFFUSION_TRAINING_TEST", "") and self.step > 0:
                     return
@@ -171,6 +178,8 @@ class TrainLoop:
         # Save the last checkpoint if it wasn't already saved.
         if (self.step - 1) % self.save_interval != 0:
             self.save()
+            self.output_intermediate_results()
+
 
     def run_step(self, batch, cond):
         self.forward_backward(batch, cond)
@@ -330,6 +339,110 @@ class TrainLoop:
         save_checkpoint(0, self.master_params)
         for rate, params in zip(self.ema_rate, self.ema_params):
             save_checkpoint(rate, params)
+
+
+    def output_intermediate_results(self):
+        root_out_path = os.path.join(self.checkpoint_path, "intermediate_output")
+        if not os.path.exists(root_out_path):
+            os.mkdir(root_out_path)
+
+        model2, tokenizer = load_models(self.args.modality, self.args.experiment, self.args.model_name_or_path, self.args.in_channel,
+                self.args.checkpoint_path)
+
+        if self.args.training_mode.startswith('e2e'):
+            print('e2e, load the right model embeddings', '*'*80)
+            model2.weight = torch.nn.Parameter(self.model.module.word_embedding.weight.clone().cpu())
+
+        all_images = []
+        while len(all_images) < self.args.num_samples:
+            model_kwargs = {}
+            sample_fn = (
+                self.diffusion.p_sample_loop if not False else self.diffusion.ddim_sample_loop
+            )
+
+            sample_shape = (1, self.args.image_size ** 2, self.args.in_channel)
+
+            model3 = get_weights(model2, self.args)
+            # print("sample_shape: ", sample_shape)
+            sample = sample_fn(
+                self.model,
+                sample_shape,
+                clip_denoised=False,
+                denoised_fn=partial(denoised_fn_round, self.args, model3.cuda()),
+                model_kwargs=model_kwargs,
+                top_p =-1,
+            )
+            # print('in sample: ', sample)
+            # print("sample_shape.shape: ", sample.shape)
+
+            all_images.extend([sample.cpu().numpy()])
+
+            logger.log(f"created {len(all_images) * 1} samples")
+        # print('all_image: ', all_images)
+        arr = np.concatenate(all_images, axis=0)
+        # print(arr.shape, 'full shape')
+        arr = arr[: self.args.num_samples * self.args.mbr_sample]
+        # print('arr: ', arr)
+        
+        word_lst_e2e = []
+        print('decoding for e2e', )
+        # print(arr.shape)
+        x_t = torch.tensor(arr).cuda()
+        if self.args.model_arch == 'conv-unet':
+            reshaped_x_t = x_t.view(x_t.size(0), -1, x_t.size(-1))
+        else:
+            reshaped_x_t = x_t
+
+        # print('reshaped_x_t: ',reshaped_x_t)
+        logits = self.model.module.get_logits(reshaped_x_t)  # bsz, seqlen, vocab
+        # print('logits: ', logits)
+        cands = torch.topk(logits, k=1, dim=-1)
+        sample = cands.indices
+        tokenizer = load_tokenizer(self.args.modality, self.args.experiment, self.args.checkpoint_path)
+        for seq in cands.indices:
+            if isinstance(tokenizer, dict):
+                tokens = " ".join([tokenizer[x[0].item()] for x in seq])
+            else:
+                tokens = tokenizer.decode(seq.squeeze(-1))
+            word_lst_e2e.append(tokens)
+
+        # shape_str = "x".join([str(x) for x in arr.shape])
+        out_path = os.path.join(root_out_path, f"{(self.step+self.resume_step):06d}.samples_.npz")
+        logger.log(f"saving to {out_path}")
+        np.savez(out_path, arr)
+
+
+        logger.log('decode by rounding. ')
+        # print('load_models')
+        if self.diffusion.training_mode.startswith('e2e'):
+            word_lst = word_lst_e2e
+            # print('e2e: ', word_lst)
+        else:
+            set_seed(101)
+            model, tokenizer = load_models(self.args.modality, self.args.experiment, self.args.model_name_or_path, self.args.in_channel,
+                                        self.args.checkpoint_path)
+            print('rounding')
+            word_lst = rounding_func(self.args.experiment, arr, model, tokenizer,
+                                    emb_scale_factor=self.args.emb_scale_factor)
+
+        out_path2 = os.path.join(root_out_path, f"samples_{(self.step+self.resume_step):06d}.txt")
+        fout = open(out_path2, 'w')
+
+        for (xx) in zip(word_lst):
+            print(xx[0], file=fout)
+        fout.close()
+        print(f'written the decoded output to {out_path2}')
+
+        ##############
+        out_path2 = os.path.join(root_out_path, f"samples_{(self.step+self.resume_step):06d}.json")
+        fout = open(out_path2, 'w')
+        for (xx) in zip(word_lst):
+            print(json.dumps(xx), file=fout)
+        fout.close()
+        print(f'written the decoded output to {out_path2}')
+
+
+
 
     def _master_params_to_state_dict(self, master_params):
         if self.use_fp16:

@@ -7,6 +7,7 @@ import sys, yaml, os
 # sys.path.insert(0, os.path.join(sys.path[0], '../../transformers/examples/pytorch/language-modeling'))
 # from custom_trainer import GPT2LMHeadModelCompress, BERTModelCompress, AutoEncoderWithNoise
 
+
 def load_models(modality, mode, model_name_or_path, emb_dim, file, extra_args=None):
 
     if mode in ['random', 'random1', 'random_up_proj', 'glove']:
