@@ -12,7 +12,8 @@ All arguments now in parser.py now. Basically what we need to change across diff
     --pln_train       "The path to training dataset folder, 'train.txt' and 'val.txt' should be in that folder"
     --padding_mode    "default='pad', padding the sequence, or "block" "
     --noise_schedule   "scheduled noise added to diffusion process, it can be 'linear, cosine, sqrt, trunc_cos, trunc_lin, pw_lin'. default=sqrt "
-
+    --num_samples      'The number of intermediate output samples.'
+    --save_interval       'Save interval by steps'
 
 For better debugging, model initilization in "utils.py", trainer in "train_utils.py", dataset loading in "text_dataset.py", models are in "all_utils/gaussian_diffusion.py", 
 
