@@ -115,7 +115,7 @@ def load_data_text(
             batch_size=batch_size,  # 20,
             drop_last=True,
             shuffle=False,
-            num_workers=1,
+            num_workers=12,
         )
 
     else:
@@ -124,7 +124,7 @@ def load_data_text(
             batch_size=batch_size,  # 20,
             drop_last=True,
             shuffle=True,
-            num_workers=1,
+            num_workers=12,
         )
     while True:
         yield from data_loader

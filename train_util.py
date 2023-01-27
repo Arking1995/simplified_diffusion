@@ -114,7 +114,10 @@ class TrainLoop:
             self.use_ddp = True
             self.device = 'cuda'# torch.cuda.current_device()
             print('number of gpu available:', self.ngpu)
+            # self.model = self.model.to(self.device)
             self.model = torch.nn.DataParallel(self.model, list(range(self.ngpu))).to(self.device)
+            # self.model = torch.nn.DataParallel(self.model, [1]).to(self.device)
+
 
     def _load_and_sync_parameters(self):
         resume_checkpoint = find_resume_checkpoint() or self.resume_checkpoint

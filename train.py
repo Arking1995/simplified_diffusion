@@ -31,7 +31,7 @@ if __name__ == '__main__':
     args_updated = BaseOptions().parse()   # get training options
     args = create_argparser(vars(args_updated)).parse_args()
 
-    # print(args)
+    print(args.checkpoint_path)
     # if 'num_channels' in vars(args):
     #     print(vars(args)['num_channels'])
     # print(model_and_diffusion_defaults().keys())
@@ -40,14 +40,13 @@ if __name__ == '__main__':
         **args_to_dict(args, model_and_diffusion_defaults().keys())
     )
 
-    model.to('cuda:0')
+    model.to('cuda')
     pytorch_total_params = sum(p.numel() for p in model.parameters())
     print(f'the parameter count is {pytorch_total_params}')
 
     schedule_sampler = create_named_schedule_sampler(args.schedule_sampler, diffusion)
 
-
-    with open(f'{args.checkpoint_path}/training_args.json', 'w') as f:
+    with open(os.path.join(args.checkpoint_path,'training_args.json'), 'w') as f:
         json.dump(args.__dict__, f, indent=2)
 
 

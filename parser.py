@@ -63,15 +63,15 @@ class BaseOptions():
 
 
         args = parser.parse_args()
-        folder_name = 'diffusion_models/'
-        if not os.path.isdir(folder_name):
-            os.mkdir(folder_name)
-        dir_path = os.path.join(folder_name, args.checkpoint_path)
+        # folder_name = 'diffusion_models/'
+        # if not os.path.isdir(folder_name):
+        #     os.mkdir(folder_name)
+        # dir_path = os.path.join(folder_name, args.checkpoint_path)
 
-        if not os.path.isdir(dir_path):
-            os.mkdir(dir_path)   
+        # if not os.path.isdir(dir_path):
+        #     os.mkdir(dir_path)   
 
-        args.checkpoint_path = dir_path
+        # args.checkpoint_path = dir_path
         return args
 
 

@@ -1471,6 +1471,7 @@ class GaussianDiffusion:
         assert 'input_ids' in model_kwargs
         input_ids = model_kwargs.pop('input_ids').to(t.device)
         x_start_mean = model.model.module.get_embeds(input_ids)
+        # x_start_mean = model.model.get_embeds(input_ids)
         if self.model_arch == 'conv-unet':
             seqlen = int(np.sqrt(input_ids.size(1)))
             x_start_mean = x_start_mean.view(x_start_mean.size(0), seqlen, seqlen, x_start_mean.size(-1)).permute(0, 3,
