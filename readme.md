@@ -1,6 +1,28 @@
+# Diffusion-Based Document Layout Generation
+Official Pytorch Implementation of "Diffusion-Based Document Layout Generation"
+
+[Paper](https://link.springer.com/chapter/10.1007/978-3-031-41676-7_21) | [Project Page](https://arking1995.github.io/DIFF_DOC/)
+
+This repo contains codes for single GPU training for the diffusion backbone in the paper. The original codes are referred to [Diffusion-LM](https://github.com/XiangLi1999/Diffusion-LM).
+
 To run the training code, simply "python train.py", default arguments will make it run on Publaynet dataset in the repo.
 
-All arguments now in parser.py now. Basically what we need to change across different datasets are:
+## Environment
+```
+Pytorch==1.8.0
+cudatoolkit==11.1
+transformers==4.20.1
+huggingface-hub==0.8.1
+```
+
+## How to train your model
+Sample command:
+```
+python train.py {arguments below}
+```
+
+Argument list locates in "parser.py". Basic modifications across different datasets are:
+```
     --batch_size  "defaultly 64, it only uses about 8GB memory on my local GPU"
     --lr           "learning rate"
     --lr_anneal_steps   "how many steps you wanna train"
@@ -14,16 +36,17 @@ All arguments now in parser.py now. Basically what we need to change across diff
     --noise_schedule   "scheduled noise added to diffusion process, it can be 'linear, cosine, sqrt, trunc_cos, trunc_lin, pw_lin'. default=sqrt "
     --num_samples      'The number of intermediate output samples.'
     --save_interval       'Save interval by steps'
-
+```
 For better debugging, model initilization in "utils.py", trainer in "train_utils.py", dataset loading in "text_dataset.py", models are in "all_utils/gaussian_diffusion.py", 
 
 All files under ./all_utlis can be directly used without change for now.
 
-I use the most simplified data parallel function, which we already used for layouttransformer and it runs smoothly on itp/ocra. And it works on my local 2-gpu paralling. So I think this time it should work on itp.
-
-I modified the data preparation part so now it wouldn't eat memory for long sequence dataset now. I monitored the training by htop with batch_size=64, maximum cpu occupation is around 7GB. So we may try larger batch_size for itp
-
 Current codes will automatically upload training curve to my wandb account, if you don't like it, just change the crediential of wandb.init() in "train.py"
+
+## How to inference
+```
+python text_sample.py --model_path {model path ".pt"} --batch_size 1 --num_samples 1000 --top_p -1.0 --out_dir {output directory}
+```
 
 
 
